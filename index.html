@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vynox Hub — Bots Discord</title>
+  <meta name="description" content="Hub central Vynox & RaidX. Dashboard, comptes, serveurs." />
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+
+  <header class="nav">
+    <a class="brand" href="index.html"><span class="logo">V</span><span>Vynox <em>Hub</em></span></a>
+    <div class="nav-links">
+      <a href="#bots" class="hide-sm">Bots</a>
+      <a href="pages/cgu.html" class="hide-sm">CGU</a>
+      <a href="pages/privacy.html" class="hide-sm">Confidentialité</a>
+      <a href="pages/reglement.html" class="hide-sm">Règlement</a>
+      <span id="nav-auth"></span>
+    </div>
+  </header>
+
+  <section class="hero">
+    <p class="badge">Hub multi-bots · Comptes · Dashboard</p>
+    <h1>Tes bots.<br /><span>Ton hub.</span></h1>
+    <p class="lead">
+      Vynox, RaidX et la suite — invites, docs, et un dashboard pour voir les serveurs
+      où tes bots sont présents. Connexion Discord ou e-mail.
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="login.html">Se connecter</a>
+      <a class="btn btn-ghost" href="#bots">Voir les bots</a>
+      <a class="btn btn-discord" href="/api/auth/discord">Discord</a>
+    </div>
+  </section>
+
+  <section class="section" id="bots">
+    <div class="section-head">
+      <h2>Bots</h2>
+      <p>Suite Vynox — un hub pour tous les projets.</p>
+    </div>
+    <div class="bot-grid">
+      <article class="bot-card featured">
+        <div class="bot-top">
+          <div class="bot-avatar vynox">V</div>
+          <div>
+            <h3>Vynox</h3>
+            <span class="tag tag-main">All-in-one</span>
+          </div>
+        </div>
+        <p>Tickets, staff, niveaux, économie, sécurité, ID, giveaways, suggestions, partenariats…</p>
+        <div class="bot-actions">
+          <a class="btn btn-primary btn-sm" href="#" id="invite-vynox" target="_blank" rel="noopener">Inviter</a>
+          <a class="btn btn-ghost btn-sm" href="login.html">Dashboard</a>
+          <a class="btn btn-ghost btn-sm" href="pages/cgu.html">Légal</a>
+        </div>
+      </article>
+      <article class="bot-card">
+        <div class="bot-top">
+          <div class="bot-avatar raidx">R</div>
+          <div>
+            <h3>RaidX</h3>
+            <span class="tag tag-sec">Sécurité</span>
+          </div>
+        </div>
+        <p>Anti-raid, anti-nuke, lockdown, whitelist. Config en <code>!config</code> / <code>!raid</code>.</p>
+        <div class="bot-actions">
+          <a class="btn btn-primary btn-sm" href="#" id="invite-raidx" target="_blank" rel="noopener">Inviter</a>
+          <a class="btn btn-ghost btn-sm" href="login.html">Dashboard</a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>Compte & accès</h2>
+    </div>
+    <div class="feature-grid">
+      <div class="feature">
+        <h4>Discord</h4>
+        <p>OAuth2 — liste des serveurs en commun avec le bot.</p>
+      </div>
+      <div class="feature">
+        <h4>E-mail</h4>
+        <p>Inscription classique pour les utilisateurs.</p>
+      </div>
+      <div class="feature">
+        <h4>Staff / Owner</h4>
+        <p>Comptes créés par l’Owner, <strong>sans e-mail</strong> (identifiant + MDP).</p>
+      </div>
+      <div class="feature">
+        <h4>Dashboard</h4>
+        <p>Serveurs, rôle, gestion staff (Owner).</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div><strong style="color:var(--text)">Vynox Hub</strong><br />Projet bots Discord</div>
+    <div class="footer-links">
+      <a href="pages/cgu.html">CGU</a>
+      <a href="pages/privacy.html">Confidentialité</a>
+      <a href="pages/reglement.html">Règlement</a>
+      <a href="login.html">Connexion</a>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/nav.js"></script>
+</body>
+</html>

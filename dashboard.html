@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard — Vynox Hub</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+  <header class="nav">
+    <a class="brand" href="index.html"><span class="logo">V</span><span>Vynox <em>Hub</em></span></a>
+    <div class="nav-links"><span id="nav-auth"></span></div>
+  </header>
+
+  <div class="dash">
+    <aside class="side">
+      <h3>Menu</h3>
+      <a href="#" class="active" data-panel="overview">Vue d’ensemble</a>
+      <a href="#" data-panel="guilds">Serveurs</a>
+      <a href="#" data-panel="staff" id="nav-staff" style="display:none">Équipe</a>
+      <a href="pages/cgu.html">CGU</a>
+      <button type="button" class="link" id="logout">Déconnexion</button>
+    </aside>
+
+    <section class="main-panel">
+      <div class="panel active" id="panel-overview">
+        <h1>Dashboard</h1>
+        <p class="sub" id="welcome">Chargement…</p>
+        <div class="notice" id="notice-discord">
+          Pour voir les serveurs où le bot est présent, connecte-toi aussi avec Discord
+          (bouton sur la page connexion).
+        </div>
+        <div class="feature-grid">
+          <div class="feature"><h4>Rôle</h4><p id="info-role">—</p></div>
+          <div class="feature"><h4>Compte</h4><p id="info-user">—</p></div>
+          <div class="feature"><h4>Discord</h4><p id="info-discord">—</p></div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-guilds">
+        <h1>Serveurs</h1>
+        <p class="sub">Serveurs Discord liés (bot présent si BOT_TOKEN configuré).</p>
+        <div id="guild-list" class="guild-grid"></div>
+      </div>
+
+      <div class="panel" id="panel-staff">
+        <h1>Équipe Staff / Owner</h1>
+        <p class="sub">Créer un compte <strong>sans e-mail</strong> (identifiant + mot de passe).</p>
+        <div class="err" id="staff-err"></div>
+        <div class="okmsg" id="staff-ok"></div>
+        <form id="form-create-staff" style="max-width:360px;margin-bottom:1.5rem">
+          <div class="form-group">
+            <label>Identifiant</label>
+            <input name="username" required maxlength="32" />
+          </div>
+          <div class="form-group">
+            <label>Mot de passe</label>
+            <input name="password" type="password" required minlength="4" />
+          </div>
+          <div class="form-group">
+            <label>Rôle</label>
+            <select name="role">
+              <option value="staff">Staff</option>
+              <option value="admin">Admin</option>
+              <option value="owner">Owner</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" type="submit">Créer le compte</button>
+        </form>
+        <h2 style="font-size:1rem;margin-bottom:.75rem">Comptes équipe</h2>
+        <div id="staff-list"></div>
+      </div>
+    </section>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/nav.js"></script>
+  <script>
+    (async function () {
+      const user = await HubAPI.getMe();
+      if (!user) {
+        location.href = 'login.html';
+        return;
+      }
+      document.getElementById('welcome').textContent = `Bienvenue, ${user.username}.`;
+      document.getElementById('info-role').textContent = user.role;
+      document.getElementById('info-user').textContent = user.email || user.username + ' (sans e-mail)';
+      document.getElementById('info-discord').textContent = user.discordId || 'Non lié — utilise Discord OAuth';
+
+      if (user.role === 'owner' || user.role === 'admin') {
+        document.getElementById('nav-staff').style.display = '';
+      }
+
+      document.querySelectorAll('.side a[data-panel]').forEach((a) => {
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          document.querySelectorAll('.side a[data-panel]').forEach((x) => x.classList.remove('active'));
+          a.classList.add('active');
+          document.querySelectorAll('.panel').forEach((p) => p.classList.remove('active'));
+          document.getElementById('panel-' + a.dataset.panel).classList.add('active');
+          if (a.dataset.panel === 'guilds') loadGuilds();
+          if (a.dataset.panel === 'staff') loadStaff();
+        });
+      });
+
+      document.getElementById('logout').onclick = async () => {
+        await HubAPI.api('/api/auth/logout', { method: 'POST' });
+        location.href = 'index.html';
+      };
+
+      async function loadGuilds() {
+        const box = document.getElementById('guild-list');
+        box.innerHTML = '<p class="sub">Chargement…</p>';
+        try {
+          const d = await HubAPI.api('/api/guilds');
+          if (d.note) {
+            document.getElementById('notice-discord').textContent = d.note;
+          }
+          if (!d.guilds?.length) {
+            box.innerHTML = '<p class="sub">Aucun serveur. Connecte-toi via Discord et assure-toi que le bot est sur le serveur.</p>';
+            return;
+          }
+          box.innerHTML = d.guilds.map((g) => {
+            const icon = g.icon
+              ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=64`
+              : null;
+            return `<div class="guild-card">
+              <div class="guild-icon">${icon ? `<img src="${icon}" alt="">` : (g.name || '?')[0]}</div>
+              <div>
+                <strong>${escapeHtml(g.name)}</strong>
+                <span>${g.botPresent === true ? 'Bot présent' : g.botPresent === false ? 'Bot absent' : 'Statut bot inconnu'}</span>
+              </div>
+            </div>`;
+          }).join('');
+        } catch (e) {
+          box.innerHTML = `<p class="sub">${escapeHtml(e.message)}</p>`;
+        }
+      }
+
+      async function loadStaff() {
+        const box = document.getElementById('staff-list');
+        try {
+          const d = await HubAPI.api('/api/staff/list');
+          box.innerHTML = d.users.map((u) =>
+            `<div class="cmd-row" style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border)">
+              <span><strong>${escapeHtml(u.username)}</strong> · ${escapeHtml(u.role)}</span>
+            </div>`
+          ).join('') || '<p class="sub">Aucun</p>';
+        } catch (e) {
+          box.innerHTML = `<p class="sub">${escapeHtml(e.message)}</p>`;
+        }
+      }
+
+      document.getElementById('form-create-staff').onsubmit = async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const err = document.getElementById('staff-err');
+        const ok = document.getElementById('staff-ok');
+        err.classList.remove('show');
+        ok.classList.remove('show');
+        try {
+          await HubAPI.api('/api/staff/create', {
+            method: 'POST',
+            body: JSON.stringify({
+              username: fd.get('username'),
+              password: fd.get('password'),
+              role: fd.get('role'),
+            }),
+          });
+          ok.textContent = 'Compte créé.';
+          ok.classList.add('show');
+          e.target.reset();
+          loadStaff();
+        } catch (ex) {
+          err.textContent = ex.message;
+          err.classList.add('show');
+        }
+      };
+
+      function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      }
+    })();
+  </script>
+</body>
+</html>

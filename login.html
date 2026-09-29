@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Connexion — Vynox Hub</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+  <header class="nav">
+    <a class="brand" href="index.html"><span class="logo">V</span><span>Vynox <em>Hub</em></span></a>
+  </header>
+
+  <div class="auth-page">
+    <div class="auth-card">
+      <h1>Connexion</h1>
+      <p class="sub">Discord, e-mail, ou compte Staff / Owner (sans e-mail).</p>
+      <div class="err" id="err"></div>
+      <div class="okmsg" id="ok"></div>
+
+      <a class="btn btn-discord btn-block" href="/api/auth/discord">Continuer avec Discord</a>
+      <div class="divider">ou</div>
+
+      <div class="tabs">
+        <button type="button" class="active" data-tab="email">E-mail</button>
+        <button type="button" data-tab="register">Créer compte</button>
+        <button type="button" data-tab="staff">Staff / Owner</button>
+      </div>
+
+      <form id="form-email">
+        <div class="form-group">
+          <label>E-mail</label>
+          <input type="email" name="email" required autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label>Mot de passe</label>
+          <input type="password" name="password" required minlength="6" autocomplete="current-password" />
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Se connecter</button>
+      </form>
+
+      <form id="form-register" style="display:none">
+        <div class="form-group">
+          <label>Pseudo</label>
+          <input type="text" name="username" required maxlength="32" />
+        </div>
+        <div class="form-group">
+          <label>E-mail</label>
+          <input type="email" name="email" required />
+        </div>
+        <div class="form-group">
+          <label>Mot de passe</label>
+          <input type="password" name="password" required minlength="6" />
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Créer le compte</button>
+        <p class="sub" style="margin-top:.75rem">En t’inscrivant tu acceptes les <a href="pages/cgu.html" style="color:#c4b5fd">CGU</a>.</p>
+      </form>
+
+      <form id="form-staff" style="display:none">
+        <div class="form-group">
+          <label>Identifiant (pas d’e-mail)</label>
+          <input type="text" name="username" required autocomplete="username" />
+        </div>
+        <div class="form-group">
+          <label>Mot de passe</label>
+          <input type="password" name="password" required autocomplete="current-password" />
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Accès équipe</button>
+        <p class="sub" style="margin-top:.75rem">Comptes créés par l’Owner uniquement.</p>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    const err = document.getElementById('err');
+    const ok = document.getElementById('ok');
+    function showErr(m) { err.textContent = m; err.classList.add('show'); ok.classList.remove('show'); }
+    function showOk(m) { ok.textContent = m; ok.classList.add('show'); err.classList.remove('show'); }
+
+    const params = new URLSearchParams(location.search);
+    if (params.get('error')) showErr(params.get('error'));
+
+    document.querySelectorAll('.tabs button').forEach((b) => {
+      b.addEventListener('click', () => {
+        document.querySelectorAll('.tabs button').forEach((x) => x.classList.remove('active'));
+        b.classList.add('active');
+        const t = b.dataset.tab;
+        document.getElementById('form-email').style.display = t === 'email' ? '' : 'none';
+        document.getElementById('form-register').style.display = t === 'register' ? '' : 'none';
+        document.getElementById('form-staff').style.display = t === 'staff' ? '' : 'none';
+      });
+    });
+
+    document.getElementById('form-email').onsubmit = async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      try {
+        await HubAPI.api('/api/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ email: fd.get('email'), password: fd.get('password') }),
+        });
+        location.href = 'dashboard.html';
+      } catch (ex) { showErr(ex.message); }
+    };
+
+    document.getElementById('form-register').onsubmit = async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      try {
+        await HubAPI.api('/api/auth/register', {
+          method: 'POST',
+          body: JSON.stringify({
+            username: fd.get('username'),
+            email: fd.get('email'),
+            password: fd.get('password'),
+          }),
+        });
+        location.href = 'dashboard.html';
+      } catch (ex) { showErr(ex.message); }
+    };
+
+    document.getElementById('form-staff').onsubmit = async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      try {
+        await HubAPI.api('/api/auth/staff-login', {
+          method: 'POST',
+          body: JSON.stringify({ username: fd.get('username'), password: fd.get('password') }),
+        });
+        location.href = 'dashboard.html';
+      } catch (ex) { showErr(ex.message); }
+    };
+  </script>
+</body>
+</html>
